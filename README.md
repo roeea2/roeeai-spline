@@ -127,6 +127,8 @@ sections in `index.html` — edit them directly.
 roeeai-spline/
 ├── index.html                 # The entire site (markup + styles + 3D logic)
 ├── superkid_robot_copy.spline # Source Spline scene file
+├── skills/
+│   └── spline-hero/           # Reusable Claude Code skill (see below)
 └── README.md
 ```
 
@@ -135,11 +137,29 @@ roeeai-spline/
 ## 🧩 Bonus: the `spline-hero` Claude Code Skill
 
 This project's 3D integration was distilled into a reusable
-[Claude Code](https://claude.com/claude-code) skill (`spline-hero`) that teaches
-the agent how to embed any Spline object into a hero section — including the
-non-obvious gotchas (serve over HTTP, use `esm.sh`, find the right scene object,
-avoid the `<spline-viewer>` pitfalls). Ask Claude to *"add a Spline scene to my
-hero"* and it handles the rest.
+[Claude Code](https://claude.com/claude-code) skill that teaches the agent how
+to embed any Spline object into a hero section — including the non-obvious
+gotchas (serve over HTTP, use `esm.sh`, find the right scene object, avoid the
+`<spline-viewer>` pitfalls).
+
+It lives in [`skills/spline-hero/`](skills/spline-hero):
+
+```
+skills/spline-hero/
+├── SKILL.md                  # when-to-use + approach + build steps
+├── assets/hero-template.html # drop-in reference implementation
+└── reference.md              # symptom-first troubleshooting checklist
+```
+
+**Install it** by copying into your Claude Code skills directory:
+
+```bash
+cp -R skills/spline-hero ~/.claude/skills/        # user-wide
+# or, per-project:
+cp -R skills/spline-hero /path/to/project/.claude/skills/
+```
+
+Then ask Claude *"add a Spline scene to my hero"* and it handles the rest.
 
 ---
 

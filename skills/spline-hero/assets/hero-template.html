@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spline Hero</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06040f;
+      --text: #f0f0f5;
+      --text-muted: rgba(240, 240, 245, 0.65);
+      --accent: #7c3aed;
+      --accent-light: #a78bfa;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── HERO ─────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 640px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 7%;
+    }
+
+    /* Fixed so the 3D model stays pinned to the viewport while the hero scrolls.
+       Faded + hidden via JS once the user scrolls past the hero. */
+    .spline-container {
+      position: fixed;
+      inset: 0;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;        /* never blocks page content / scroll-zoom */
+      transition: opacity 0.3s linear;
+      will-change: opacity;
+    }
+
+    #spline-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Directional vignette: dark on the text (left) side, clear on the model side */
+    .hero-vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(to right,
+          rgba(6,4,15,0.92) 0%, rgba(6,4,15,0.78) 28%,
+          rgba(6,4,15,0.35) 52%, transparent 68%),
+        linear-gradient(to bottom,
+          rgba(6,4,15,0.35) 0%, transparent 18%,
+          transparent 72%, rgba(6,4,15,0.7) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 520px;
+      pointer-events: none;        /* let mouse-move reach the scene; re-enable on buttons */
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.02;
+      margin-bottom: 20px;
+    }
+    .hero-title .grad {
+      background: linear-gradient(135deg, var(--accent-light), #e879f9, #60a5fa);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .hero-cta {
+      display: inline-block;
+      pointer-events: auto;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 10px;
+      box-shadow: 0 0 40px rgba(124,58,237,0.4);
+      transition: transform 0.2s;
+    }
+    .hero-cta:hover { transform: translateY(-2px); }
+
+    /* Demo section below the hero, to show the fade hand-off */
+    .below {
+      position: relative;
+      z-index: 3;
+      background: var(--bg);
+      padding: 120px 7%;
+    }
+    .below h2 { font-size: 2rem; margin-bottom: 16px; }
+    .below p { color: var(--text-muted); max-width: 560px; line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+  <section id="hero">
+    <div class="spline-container">
+      <canvas id="spline-canvas"></canvas>
+    </div>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Your headline<br><span class="grad">goes right here</span></h1>
+      <p class="hero-sub">An interactive 3D hero that follows the mouse. Replace this copy with your own.</p>
+      <a href="#more" class="hero-cta">Get started</a>
+    </div>
+  </section>
+
+  <section class="below" id="more">
+    <h2>Next section</h2>
+    <p>The 3D model fades out as you scroll into this area, so it never overlaps the content below.</p>
+  </section>
+
+  <!-- Scroll fade: dim + hide the fixed 3D container as the hero scrolls away -->
+  <script>
+    const splineEl = document.querySelector('.spline-container');
+    window.addEventListener('scroll', () => {
+      const fade = Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.85));
+      splineEl.style.opacity = fade;
+      splineEl.style.visibility = fade <= 0.01 ? 'hidden' : 'visible';
+    }, { passive: true });
+  </script>
+
+  <!-- Spline runtime: load scene + rotate the model toward the mouse -->
+  <script type="module">
+    // esm.sh bundles dependencies for the browser (unpkg does not). No version
+    // pin, so the runtime stays compatible with the scene.
+    import { Application } from 'https://esm.sh/@splinetool/runtime';
+
+    // ⬇⬇⬇ REPLACE with the user's prod.spline.design/.../scene.splinecode URL ⬇⬇⬇
+    const SCENE_URL = 'https://prod.spline.design/REPLACE_ME/scene.splinecode';
+
+    const canvas = document.getElementById('spline-canvas');
+    const hero   = document.getElementById('hero');
+    const app    = new Application(canvas);
+
+    let model = null;
+    let tY = 0, cY = 0;   // target / current Y rotation (left-right)
+    let tX = 0, cX = 0;   // target / current X rotation (up-down)
+
+    app.load(SCENE_URL).then(() => {
+      const all = app.getAllObjects();
+
+      // Log the scene graph so you can confirm/override the picked object
+      console.table(all.map(o => ({
+        name: o.name, type: o.type,
+        children: o.children?.length ?? 0,
+        parent: o.parent?.name ?? '(root)'
+      })));
+
+      // Skip cameras, lights and background/env; the model's root group has the
+      // most children, so sort descending and take the top one.
+      const skip = /camera|light|ambient|directional|point|spot|hemi|sun|background|bg|env|sky|floor|ground|plane/i;
+      const viable = all
+        .filter(o => o.name && !skip.test(o.name))
+        .sort((a, b) => (b.children?.length ?? 0) - (a.children?.length ?? 0));
+
+      model = viable[0] ?? all[0];
+      console.log('[spline-hero] ✓ rotating:', model?.name, '| children:', model?.children?.length);
+
+      // If this grabs the wrong thing, hard-code it:
+      // model = app.findObjectByName('YourObjectName');
+    }).catch(err => console.error('[spline-hero] scene load failed:', err));
+
+    // Mouse X → left/right (rotation.y); mouse Y → up/down (rotation.x).
+    // Listen on window so movement over the overlaid text still counts.
+    window.addEventListener('mousemove', e => {
+      const r = hero.getBoundingClientRect();
+      if (e.clientY < r.top || e.clientY > r.bottom) return;     // only inside hero
+      const nx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);  // −1…+1
+      const ny = (e.clientY - r.top  - r.height / 2) / (r.height / 2);  // −1…+1
+      tY =  nx * Math.PI * 0.5;    // ±90° turn
+      tX = -ny * Math.PI * 0.18;   // ±32° look up/down (negated: up = look up)
+    });
+    window.addEventListener('mouseleave', () => { tY = 0; tX = 0; });
+
+    // Smooth lerp toward the target each frame
+    (function tick() {
+      cY += (tY - cY) * 0.08;
+      cX += (tX - cX) * 0.08;
+      if (model) {
+        model.rotation.y = cY;
+        model.rotation.x = cX;
+      }
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>
