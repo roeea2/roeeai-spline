@@ -161,6 +161,29 @@ cp -R skills/spline-hero /path/to/project/.claude/skills/
 
 Then ask Claude *"add a Spline scene to my hero"* and it handles the rest.
 
+### Will it follow the mouse?
+
+The template ships with the full mouse-tracking code, but it follows the mouse
+**only after two things are true**:
+
+1. **You replace the scene URL.** The template ships with a placeholder —
+   nothing loads until it points at a real scene:
+   ```js
+   const SCENE_URL = 'https://prod.spline.design/REPLACE_ME/scene.splinecode';
+   ```
+2. **It grabs the right object.** The template auto-picks the scene object with
+   the most children (a model's root group), which works for most scenes. But
+   the *wrong* object can get picked — if you see the **background rotating**
+   instead of the model, read the `console.table` it logs and hard-code the
+   correct one:
+   ```js
+   model = app.findObjectByName('YourObjectName');
+   ```
+
+In other words: the code is there and works (this site is proof), but for an
+arbitrary scene expect to confirm step 2 via the console — which is exactly why
+the skill logs the scene graph and documents the fix.
+
 ---
 
 ## 📄 License
