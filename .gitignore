@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+
+# Editor / agent config
+.claude/
+
+# Local dev
+*.log
+node_modules/
+
+# Unrelated local tooling
+skill-creator/

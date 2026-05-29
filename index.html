@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoeeAI — AI Expert & Strategist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #7c3aed;
+      --accent-light: #a78bfa;
+      --accent-glow: rgba(124, 58, 237, 0.4);
+      --text: #f0f0f5;
+      --text-muted: rgba(240, 240, 245, 0.6);
+      --bg: #06040f;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ─────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(6, 4, 15, 0.5);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+
+    .nav-logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #fff !important;
+      padding: 9px 22px;
+      border-radius: 8px;
+      transition: background 0.2s, transform 0.2s !important;
+    }
+
+    .nav-cta:hover {
+      background: #6d28d9 !important;
+      transform: translateY(-1px);
+    }
+
+    /* ── HERO ────────────────────────────────────── */
+    #hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 640px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 7%;
+    }
+
+    .spline-container {
+      position: fixed;        /* pinned to viewport — stays while scrolling the hero */
+      inset: 0;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;   /* never blocks page content below */
+      transition: opacity 0.3s linear;
+      will-change: opacity;
+    }
+
+    #robot-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Left-side vignette — text is readable on the left, robot is open on the right */
+    .hero-vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(to right,
+          rgba(6,4,15,0.92) 0%,
+          rgba(6,4,15,0.78) 28%,
+          rgba(6,4,15,0.35) 52%,
+          transparent 68%),
+        linear-gradient(to bottom,
+          rgba(6,4,15,0.35) 0%,
+          transparent 18%,
+          transparent 72%,
+          rgba(6,4,15,0.7) 100%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: left;
+      pointer-events: none;
+      max-width: 520px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124, 58, 237, 0.18);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      color: var(--accent-light);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 7px 18px;
+      border-radius: 999px;
+      margin-bottom: 28px;
+      pointer-events: auto;
+      backdrop-filter: blur(10px);
+      animation: fadeSlideDown 0.8s ease both;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--accent-light);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      margin-bottom: 24px;
+      animation: fadeSlideDown 0.8s 0.15s ease both;
+    }
+
+    .hero-title .line-white { color: #fff; display: block; }
+
+    .hero-title .line-gradient {
+      display: block;
+      background: linear-gradient(135deg, var(--accent-light), #e879f9, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-muted);
+      font-weight: 400;
+      line-height: 1.7;
+      max-width: 560px;
+      margin: 0 0 40px;
+      animation: fadeSlideDown 0.8s 0.3s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      pointer-events: auto;
+      animation: fadeSlideDown 0.8s 0.45s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 14px 32px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 40px var(--accent-glow);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 60px var(--accent-glow);
+      background: #6d28d9;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 14px 32px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      pointer-events: none;
+      animation: fadeIn 1s 1s ease both;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--text-muted), transparent);
+      animation: scrollPulse 1.6s infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { transform: scaleY(1); opacity: 1; }
+      50% { transform: scaleY(0.5); opacity: 0.4; }
+    }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── SCROLL SCRUBBER ─────────────────────────── */
+    #scrub-track {
+      height: 400vh;
+      position: relative;
+    }
+
+    .scrub-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    #scrub-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .scrub-stages {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .scrub-stage {
+      position: absolute;
+      left: 8%;
+      top: 50%;
+      max-width: 460px;
+      opacity: 0;
+      transform: translateY(calc(-50% + 28px));
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    .scrub-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+
+    .scrub-heading {
+      font-size: clamp(2rem, 3.8vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .scrub-body {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+
+    .scrub-progress-wrap {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(320px, 60vw);
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    #scrub-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #e879f9);
+      border-radius: 2px;
+      transition: width 0.05s linear;
+    }
+
+    .scrub-scroll-label {
+      position: absolute;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      z-index: 3;
+      white-space: nowrap;
+    }
+
+    /* ── STATS STRIP ─────────────────────────────── */
+    .stats-strip {
+      background: rgba(255,255,255,0.025);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 40px;
+    }
+
+    .stats-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fff, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    /* ── SECTIONS ────────────────────────────────── */
+    section {
+      padding: 100px 40px;
+    }
+
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    /* ── ABOUT ───────────────────────────────────── */
+    #about .section-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .about-text p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .about-text p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .about-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 32px;
+    }
+
+    .tag {
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 6px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      color: var(--accent-light);
+    }
+
+    .about-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .about-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .about-card:hover {
+      border-color: rgba(124, 58, 237, 0.4);
+      background: rgba(124, 58, 237, 0.06);
+    }
+
+    .about-card-icon {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    .about-card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .about-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── SERVICES ────────────────────────────────── */
+    #services { background: rgba(255,255,255,0.015); }
+
+    .services-header {
+      margin-bottom: 60px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), #e879f9);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .service-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(124, 58, 237, 0.35);
+      box-shadow: 0 20px 60px rgba(124, 58, 237, 0.15);
+    }
+
+    .service-card:hover::before { opacity: 1; }
+
+    .service-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+    }
+
+    .service-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .service-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ── PROCESS ─────────────────────────────────── */
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2px;
+      margin-top: 60px;
+    }
+
+    .process-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 40px 32px;
+      position: relative;
+    }
+
+    .process-step:first-child { border-radius: 16px 0 0 16px; }
+    .process-step:last-child  { border-radius: 0 16px 16px 0; }
+
+    .process-num {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(167,139,250,0.1));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .process-step h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .process-step p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ── TESTIMONIALS ────────────────────────────── */
+    #testimonials { background: rgba(255,255,255,0.015); }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 60px;
+    }
+
+    .testimonial-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      transition: border-color 0.3s;
+    }
+
+    .testimonial-card:hover {
+      border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    .testimonial-stars {
+      color: #f59e0b;
+      font-size: 1rem;
+      margin-bottom: 18px;
+      letter-spacing: 2px;
+    }
+
+    .testimonial-text {
+      font-size: 0.95rem;
+      color: rgba(240, 240, 245, 0.8);
+      line-height: 1.75;
+      margin-bottom: 24px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .author-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #e879f9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .author-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .author-role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── CTA ─────────────────────────────────────── */
+    #contact {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .cta-box {
+      position: relative;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 28px;
+      padding: 80px 40px;
+      backdrop-filter: blur(20px);
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .cta-box .section-eyebrow { text-align: center; margin-bottom: 20px; }
+
+    .cta-box .section-title {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      margin-bottom: 20px;
+    }
+
+    .cta-box .section-sub {
+      max-width: 480px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .contact-form {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 480px;
+      margin: 0 auto 20px;
+    }
+
+    .contact-form input {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 13px 18px;
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .contact-form input::placeholder { color: var(--text-muted); }
+    .contact-form input:focus { border-color: rgba(124, 58, 237, 0.6); }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 30%, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      section { padding: 80px 20px; }
+      #about .section-inner { grid-template-columns: 1fr; gap: 48px; }
+      .process-step:first-child,
+      .process-step:last-child { border-radius: 0; }
+      footer { flex-direction: column; text-align: center; }
+    }
+
+    /* ── SCROLL REVEAL ───────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">RoeeAI</div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#testimonials">Testimonials</a></li>
+      <li><a href="#contact" class="nav-cta">Work with me</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="spline-container">
+      <canvas id="robot-canvas"></canvas>
+    </div>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Available for new projects
+      </div>
+      <h1 class="hero-title">
+        <span class="line-white">Building the</span>
+        <span class="line-gradient">AI-Powered Future</span>
+      </h1>
+      <p class="hero-sub">
+        AI expert, strategist, and builder. I help companies design, develop, and deploy intelligent systems that create real business value.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">
+          Start a Project
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#services" class="btn-secondary">
+          Explore Services
+        </a>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- SCROLL SCRUBBER -->
+  <div id="scrub-track">
+    <div class="scrub-sticky">
+      <canvas id="scrub-canvas"></canvas>
+
+      <div class="scrub-stages">
+        <div class="scrub-stage" data-start="0" data-end="0.26">
+          <p class="scrub-eyebrow">01 — Data Input</p>
+          <h2 class="scrub-heading">Raw data enters<br>the system</h2>
+          <p class="scrub-body">Unstructured signals from the world — text, images, code — scattered and waiting to be understood.</p>
+        </div>
+        <div class="scrub-stage" data-start="0.26" data-end="0.52">
+          <p class="scrub-eyebrow">02 — Pattern Recognition</p>
+          <h2 class="scrub-heading">Connections begin<br>to form</h2>
+          <p class="scrub-body">Neural pathways activate, finding relationships hidden within noise. The model learns to see.</p>
+        </div>
+        <div class="scrub-stage" data-start="0.52" data-end="0.78">
+          <p class="scrub-eyebrow">03 — Deep Processing</p>
+          <h2 class="scrub-heading">Layers of understanding<br>crystallise</h2>
+          <p class="scrub-body">Abstraction upon abstraction. Concepts emerge as deeper representations take shape across layers.</p>
+        </div>
+        <div class="scrub-stage" data-start="0.78" data-end="1.0">
+          <p class="scrub-eyebrow">04 — Intelligence</p>
+          <h2 class="scrub-heading">Insight becomes<br>action</h2>
+          <p class="scrub-body">From chaos to clarity. The fully activated network reasons, generates, and creates real value.</p>
+        </div>
+      </div>
+
+      <p class="scrub-scroll-label">Scroll to explore</p>
+      <div class="scrub-progress-wrap">
+        <div id="scrub-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="stats-inner">
+      <div class="stat">
+        <div class="stat-value">50+</div>
+        <div class="stat-label">AI Projects Delivered</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">8+</div>
+        <div class="stat-label">Years of AI Experience</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">30+</div>
+        <div class="stat-label">Enterprise Clients</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">$50M+</div>
+        <div class="stat-label">Revenue Generated for Clients</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-inner">
+      <div class="about-text reveal">
+        <div class="section-eyebrow">About</div>
+        <h2 class="section-title">AI isn't the future —<br>it's already here.</h2>
+        <p>I'm Roee, an <strong>AI expert and strategist</strong> with deep expertise in building intelligent systems that scale. From conversational AI to computer vision, LLM pipelines to autonomous agents — I bridge the gap between cutting-edge research and production-ready solutions.</p>
+        <p>My work spans <strong>startups to Fortune 500 companies</strong>, helping teams unlock the true potential of AI without the typical hype or complexity.</p>
+        <div class="about-tags">
+          <span class="tag">LLMs & Agents</span>
+          <span class="tag">RAG Systems</span>
+          <span class="tag">Computer Vision</span>
+          <span class="tag">MLOps</span>
+          <span class="tag">AI Strategy</span>
+          <span class="tag">Prompt Engineering</span>
+          <span class="tag">Fine-tuning</span>
+          <span class="tag">Generative AI</span>
+        </div>
+      </div>
+      <div class="about-visual reveal" style="transition-delay: 0.15s;">
+        <div class="about-card">
+          <div class="about-card-icon">🧠</div>
+          <h4>Deep Technical Expertise</h4>
+          <p>Hands-on experience with GPT-4, Claude, Gemini, open-source models, vector databases, embeddings, and the full modern AI stack.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">🚀</div>
+          <h4>From Prototype to Production</h4>
+          <p>Not just theory — I build systems that run at scale, with proper evals, monitoring, and continuous improvement loops.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-card-icon">💡</div>
+          <h4>Strategic AI Thinking</h4>
+          <p>Help you identify where AI creates real leverage in your business vs. where it's noise. Ruthlessly focused on ROI.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="section-inner">
+      <div class="services-header reveal">
+        <div class="section-eyebrow">Services</div>
+        <h2 class="section-title">What I can do<br>for your business</h2>
+        <p class="section-sub">End-to-end AI expertise — from initial strategy through deployment and ongoing optimization.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card reveal" style="transition-delay:0.05s">
+          <div class="service-icon">🤖</div>
+          <h3>AI Agent Development</h3>
+          <p>Design and build autonomous AI agents that reason, plan, and take action. Specializing in multi-agent systems, tool use, and complex workflows.</p>
+        </div>
+        <div class="service-card reveal" style="transition-delay:0.1s">
+          <div class="service-icon">💬</div>
+          <h3>LLM & Chatbot Systems</h3>
+          <p>Production-grade chatbots, RAG pipelines, and conversational AI. Optimized for accuracy, latency, and cost efficiency.</p>
+        </div>
+        <div class="service-card reveal" style="transition-delay:0.15s">
+          <div class="service-icon">🔍</div>
+          <h3>AI Strategy Consulting</h3>
+          <p>Audit your current stack, map your AI opportunity landscape, and build a realistic roadmap to meaningful AI integration.</p>
+        </div>
+        <div class="service-card reveal" style="transition-delay:0.2s">
+          <div class="service-icon">🛠️</div>
+          <h3>Custom Model Development</h3>
+          <p>Fine-tuning, RLHF, and domain-specific model training. When off-the-shelf isn't good enough for your use case.</p>
+        </div>
+        <div class="service-card reveal" style="transition-delay:0.25s">
+          <div class="service-icon">📊</div>
+          <h3>AI Product Integration</h3>
+          <p>Seamlessly embed AI capabilities into your existing products — APIs, SDKs, streaming responses, and user-facing AI features.</p>
+        </div>
+        <div class="service-card reveal" style="transition-delay:0.3s">
+          <div class="service-icon">🎓</div>
+          <h3>Team Training & Workshops</h3>
+          <p>Upskill your engineering and product teams on prompt engineering, AI development patterns, and evaluation best practices.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-eyebrow">Process</div>
+        <h2 class="section-title">How I work</h2>
+        <p class="section-sub">A proven process for shipping AI that actually works in the real world.</p>
+      </div>
+      <div class="process-grid">
+        <div class="process-step reveal" style="transition-delay:0.05s">
+          <div class="process-num">01</div>
+          <h4>Discover</h4>
+          <p>Deep dive into your business, goals, and data landscape to identify high-leverage AI opportunities.</p>
+        </div>
+        <div class="process-step reveal" style="transition-delay:0.1s">
+          <div class="process-num">02</div>
+          <h4>Design</h4>
+          <p>Architect the right solution — model selection, data pipelines, evaluation criteria, and system design.</p>
+        </div>
+        <div class="process-step reveal" style="transition-delay:0.15s">
+          <div class="process-num">03</div>
+          <h4>Build</h4>
+          <p>Rapid prototyping followed by production-hardened engineering. Iterate fast, evaluate rigorously.</p>
+        </div>
+        <div class="process-step reveal" style="transition-delay:0.2s">
+          <div class="process-num">04</div>
+          <h4>Launch</h4>
+          <p>Deploy with monitoring, feedback loops, and a plan for continuous improvement as the system learns.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-eyebrow">Testimonials</div>
+        <h2 class="section-title">What clients say</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial-card reveal" style="transition-delay:0.05s">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Roee transformed our customer support with an AI agent that handles 80% of queries autonomously. The quality bar he set for evals and testing gave us confidence to ship fast."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">ST</div>
+            <div>
+              <div class="author-name">Sarah T.</div>
+              <div class="author-role">CTO, SaaS Platform</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal" style="transition-delay:0.1s">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"We tried building our RAG system in-house for 6 months with mediocre results. Roee rebuilt it in 3 weeks and accuracy went from 62% to 91%. Incredible."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">MK</div>
+            <div>
+              <div class="author-name">Michael K.</div>
+              <div class="author-role">Founder, LegalTech Startup</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal" style="transition-delay:0.15s">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Best AI consulting engagement we've had. Roee doesn't just deliver — he teaches your team along the way. We're now far more capable than when we started."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">AL</div>
+            <div>
+              <div class="author-name">Aisha L.</div>
+              <div class="author-role">VP Product, Enterprise Co.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT / CTA -->
+  <section id="contact">
+    <div class="cta-glow"></div>
+    <div class="section-inner">
+      <div class="cta-box reveal">
+        <div class="section-eyebrow">Let's build together</div>
+        <h2 class="section-title">Ready to ship your<br>AI product?</h2>
+        <p class="section-sub">Whether you're starting from zero or scaling an existing AI system, I'd love to help. Drop your email to start the conversation.</p>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+          <input type="email" id="email-input" placeholder="your@email.com" required autocomplete="email" />
+          <button type="submit" class="btn-primary">
+            Get in touch
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+        <p id="form-msg" style="font-size:0.85rem;color:var(--accent-light);min-height:20px;text-align:center;margin-top:4px;"></p>
+        <div class="cta-actions" style="margin-top:28px;">
+          <a href="mailto:roeea2@gmail.com" class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M2 6l6 4 6-4" stroke="currentColor" stroke-width="1.3"/></svg>
+            roeea2@gmail.com
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">RoeeAI</div>
+    <ul class="footer-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="footer-copy">© 2026 RoeeAI. All rights reserved.</div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Nav background on scroll
+    const nav = document.querySelector('nav');
+    const splineEl = document.querySelector('.spline-container');
+    window.addEventListener('scroll', () => {
+      nav.style.background = window.scrollY > 60
+        ? 'rgba(6, 4, 15, 0.92)'
+        : 'rgba(6, 4, 15, 0.5)';
+
+      // Fade the fixed 3D robot out across the first viewport of scroll,
+      // and disable it once invisible so it never overlaps content below.
+      if (splineEl) {
+        const fade = Math.max(0, 1 - window.scrollY / (window.innerHeight * 0.85));
+        splineEl.style.opacity = fade;
+        splineEl.style.visibility = fade <= 0.01 ? 'hidden' : 'visible';
+      }
+    }, { passive: true });
+
+    // ── Neural-network scroll scrubber ───────────────────────────────────
+    (function () {
+      const track   = document.getElementById('scrub-track');
+      const canvas  = document.getElementById('scrub-canvas');
+      const ctx     = canvas.getContext('2d');
+      const stages  = document.querySelectorAll('.scrub-stage');
+      const bar     = document.getElementById('scrub-bar');
+
+      const LAYERS = [5, 8, 12, 8, 5]; // nodes per layer
+      let nodes = [], edges = [];
+      let W = 0, H = 0;
+      let scrubP = 0;   // 0 → 1 scroll progress
+      let time  = 0;    // seconds, for pulse animation
+
+      // ── deterministic pseudo-random (stable node positions) ──────────
+      function rng(n) {
+        const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+        return x - Math.floor(x);
+      }
+
+      // ── build node + edge lists ───────────────────────────────────────
+      function buildGraph() {
+        nodes = [];
+        let gi = 0;
+        LAYERS.forEach((count, li) => {
+          for (let ni = 0; ni < count; ni++) {
+            nodes.push({
+              // network (target) position — evenly distributed grid
+              nx: (li + 1) / (LAYERS.length + 1) * W,
+              ny: (ni + 1) / (count + 1) * H,
+              // scatter (start) position — seeded random
+              sx: rng(gi * 2.31 + 0.1) * W,
+              sy: rng(gi * 3.71 + 0.4) * H,
+              r:     2.5 + rng(gi * 0.91) * 2,
+              phase: rng(gi * 1.63) * Math.PI * 2,
+              layer: li,
+            });
+            gi++;
+          }
+        });
+
+        edges = [];
+        let base = 0;
+        LAYERS.forEach((count, li) => {
+          if (li === LAYERS.length - 1) return;
+          const next = LAYERS[li + 1];
+          for (let a = 0; a < count; a++)
+            for (let b = 0; b < next; b++)
+              edges.push({ a: base + a, b: base + count + b });
+          base += count;
+        });
+      }
+
+      function setup() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = canvas.offsetWidth;
+        H = canvas.offsetHeight;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        ctx.resetTransform();
+        ctx.scale(dpr, dpr);
+        buildGraph();
+        updateStages();
+      }
+
+      // ── helpers ───────────────────────────────────────────────────────
+      const lerp    = (a, b, t) => a + (b - a) * t;
+      const easeIO  = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2;
+
+      // ── draw one frame ────────────────────────────────────────────────
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        const p     = easeIO(scrubP);
+        const pEdge = Math.max(0, (p - 0.08) / 0.92); // edges fade after 8 %
+
+        // edges
+        edges.forEach(({ a, b }) => {
+          const na = nodes[a], nb = nodes[b];
+          const ax = lerp(na.sx, na.nx, p), ay = lerp(na.sy, na.ny, p);
+          const bx = lerp(nb.sx, nb.nx, p), by = lerp(nb.sy, nb.ny, p);
+          const pulse = (Math.sin(time * 1.8 + na.phase) + 1) * 0.5;
+          const alpha = pEdge * (0.22 + pulse * 0.14);
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.strokeStyle = `rgba(167,139,250,${alpha.toFixed(3)})`;
+          ctx.lineWidth   = 0.5 + pulse * 0.5 * pEdge;
+          ctx.stroke();
+        });
+
+        // nodes
+        nodes.forEach(n => {
+          const x     = lerp(n.sx, n.nx, p);
+          const y     = lerp(n.sy, n.ny, p);
+          const pulse = (Math.sin(time * 1.5 + n.phase) + 1) * 0.5;
+          const r     = n.r * (1 + pulse * 0.4 * p);
+
+          // soft glow halo
+          const grd = ctx.createRadialGradient(x, y, 0, x, y, r * 7);
+          grd.addColorStop(0, `rgba(124,58,237,${((0.05 + pulse*0.07)*p).toFixed(3)})`);
+          grd.addColorStop(1, 'rgba(124,58,237,0)');
+          ctx.beginPath();
+          ctx.arc(x, y, r * 7, 0, Math.PI * 2);
+          ctx.fillStyle = grd;
+          ctx.fill();
+
+          // core dot (white → purple as progress increases)
+          const rv = Math.round(lerp(220, 167, p));
+          const gv = Math.round(lerp(220, 139, p));
+          const bv = Math.round(lerp(235, 250, p));
+          const av = (0.4 + p * 0.6).toFixed(2);
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${rv},${gv},${bv},${av})`;
+          ctx.fill();
+        });
+      }
+
+      // ── stage text transitions ────────────────────────────────────────
+      function updateStages() {
+        stages.forEach(el => {
+          const s = parseFloat(el.dataset.start);
+          const e = parseFloat(el.dataset.end);
+          if (scrubP >= s && scrubP <= e) {
+            el.style.opacity   = '1';
+            el.style.transform = 'translateY(-50%)';
+          } else {
+            el.style.opacity   = '0';
+            const dir = scrubP < s ? '28px' : '-28px';
+            el.style.transform = `translateY(calc(-50% + ${dir}))`;
+          }
+        });
+        if (bar) bar.style.width = (scrubP * 100) + '%';
+      }
+
+      // ── scroll handler ────────────────────────────────────────────────
+      window.addEventListener('scroll', () => {
+        const rect      = track.getBoundingClientRect();
+        const scrollable = track.offsetHeight - window.innerHeight;
+        scrubP = Math.max(0, Math.min(1, -rect.top / scrollable));
+        updateStages();
+      }, { passive: true });
+
+      window.addEventListener('resize', setup);
+
+      // ── RAF loop ──────────────────────────────────────────────────────
+      function tick(ts) {
+        time = ts / 1000;
+        draw();
+        requestAnimationFrame(tick);
+      }
+
+      setup();
+      requestAnimationFrame(tick);
+    })();
+
+    // Simple form handler
+    function handleSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('email-input').value;
+      const msg = document.getElementById('form-msg');
+      msg.textContent = `Thanks! I'll be in touch with ${email} soon.`;
+      document.getElementById('email-input').value = '';
+      setTimeout(() => { msg.textContent = ''; }, 5000);
+    }
+  </script>
+
+  <!-- Spline runtime direct — full programmatic access, no web component -->
+  <script type="module">
+    import { Application } from 'https://esm.sh/@splinetool/runtime';
+
+    const canvas = document.getElementById('robot-canvas');
+    const hero   = document.getElementById('hero');
+
+    console.log('[RoeeAI] runtime loaded, starting scene…');
+
+    const app = new Application(canvas);
+    let robot = null, tY = 0, cY = 0, tX = 0, cX = 0;
+
+    app.load('https://prod.spline.design/nMOjVjmyNlaGPuSG/scene.splinecode')
+      .then(() => {
+        const all = app.getAllObjects();
+
+        // Log everything — name, child count, parent — so we can see the hierarchy
+        console.table(all.map(o => ({
+          name:     o.name,
+          type:     o.type,
+          children: o.children?.length ?? 0,
+          parent:   o.parent?.name ?? '(root)'
+        })));
+
+        // Skip cameras, lights, and background/env objects
+        const skipRE = /camera|light|ambient|directional|point|spot|hemi|sun|background|bg|env|sky|floor|ground|plane/i;
+        const viable = all.filter(o => o.name && !skipRE.test(o.name));
+
+        // The robot root group will have the most children — sort descending
+        viable.sort((a, b) => (b.children?.length ?? 0) - (a.children?.length ?? 0));
+
+        robot = viable[0] ?? all[0];
+        console.log('[RoeeAI] ✓ rotating:', robot?.name, '| children:', robot?.children?.length);
+      })
+      .catch(err => console.error('[RoeeAI] scene load failed:', err));
+
+    // Mouse X → left/right (rotation.y), mouse Y → up/down (rotation.x)
+    window.addEventListener('mousemove', e => {
+      const r = hero.getBoundingClientRect();
+      if (e.clientY < r.top || e.clientY > r.bottom) return;
+      const nx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2); // −1…+1
+      const ny = (e.clientY - r.top  - r.height / 2) / (r.height / 2); // −1…+1
+      tY =  nx * Math.PI * 0.5;   // ±90° horizontal turn
+      tX = -ny * Math.PI * 0.18;  // ±32° look up/down (negated: mouse up = look up)
+    });
+    window.addEventListener('mouseleave', () => { tY = 0; tX = 0; });
+
+    // Smooth lerp — sets rotation directly on the Spline object
+    (function tick() {
+      cY += (tY - cY) * 0.08;
+      cX += (tX - cX) * 0.08;
+      if (robot) {
+        robot.rotation.y = cY;
+        robot.rotation.x = cX;
+      }
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>
